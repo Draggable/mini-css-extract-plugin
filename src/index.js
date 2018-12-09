@@ -186,22 +186,8 @@ class MiniCssExtractPlugin {
             (module) => module.type === MODULE_TYPE
           );
           const { filename } = this.options;
-          let filenameTemplate = filename;
-          if (typeof filename === 'function') {
-            const {
-              hash: chunkhash,
-              contentHash: contenthash,
-              name,
-              id,
-            } = chunk;
-
-            filenameTemplate = filename({
-              chunkhash,
-              contenthash,
-              name,
-              id,
-            });
-          }
+          const filenameTemplate =
+            typeof filename === 'function' ? filename(chunk) : filename;
 
           if (renderedModules.length > 0) {
             result.push({
