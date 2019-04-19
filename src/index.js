@@ -17,7 +17,6 @@ const REGEXP_CHUNKHASH = /\[chunkhash(?::(\d+))?\]/i;
 const REGEXP_CONTENTHASH = /\[contenthash(?::(\d+))?\]/i;
 const REGEXP_NAME = /\[name\]/i;
 const REGEXP_PLACEHOLDERS = /\[(name|id|chunkhash)\]/g;
-const DEFAULT_FILENAME = '[name].css';
 
 class CssDependency extends webpack.Dependency {
   constructor(
@@ -123,26 +122,23 @@ class MiniCssExtractPlugin {
   constructor(options) {
     this.options = Object.assign(
       {
-        filename: DEFAULT_FILENAME,
+        filename: '[name].css',
       },
       options
     );
 
     if (!this.options.chunkFilename) {
       const { filename } = this.options;
+
       // Anything changing depending on chunk is fine
-      if (typeof filename === 'string') {
-        if (REGEXP_PLACEHOLDERS.test(filename)) {
-          this.options.chunkFilename = filename;
-        } else {
-          // Elsewise prefix '[id].' in front of the basename to make it changing
-          this.options.chunkFilename = filename.replace(
-            /(^|\/)([^/]*(?:\?|$))/,
-            '$1[id].$2'
-          );
-        }
+      if (REGEXP_PLACEHOLDERS.test(filename)) {
+        this.options.chunkFilename = filename;
       } else {
-        this.options.chunkFilename = `[id].${DEFAULT_FILENAME}`;
+        // Elsewise prefix '[id].' in front of the basename to make it changing
+        this.options.chunkFilename = filename.replace(
+          /(^|\/)([^/]*(?:\?|$))/,
+          '$1[id].$2'
+        );
       }
     }
   }
@@ -189,9 +185,6 @@ class MiniCssExtractPlugin {
           const renderedModules = Array.from(chunk.modulesIterable).filter(
             (module) => module.type === MODULE_TYPE
           );
-          const { filename } = this.options;
-          const filenameTemplate =
-            typeof filename === 'function' ? filename(chunk) : filename;
 
           if (renderedModules.length > 0) {
             result.push({
@@ -202,7 +195,8 @@ class MiniCssExtractPlugin {
                   renderedModules,
                   compilation.runtimeTemplate.requestShortener
                 ),
-              filenameTemplate,
+              filenameTemplate:
+                this.options.filenameTemplate || this.options.filename,
               pathOptions: {
                 chunk,
                 contentHashType: MODULE_TYPE,

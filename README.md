@@ -342,14 +342,14 @@ module.exports = {
 };
 ```
 
-#### Filename as function instead of string
+#### Filename Template Function
 
-By using a function instead of a string, you can use chunk data to customize the filename. This is particularly useful when dealing with multiple entry points and wanting to get more control out of the filename for a given entry point/chunk. In the example below, the we'll change the filename to output the css to a different directory.
+With the `filenameTemplate` option you can use chunk data to customize the filename. This is particularly useful when dealing with multiple entry points and wanting to get more control out of the filename for a given entry point/chunk. In the example below, we'll use `filenameTemplate` to output the generated css into a different directory.
 
 ```javascript
 const miniCssExtractPlugin = new MiniCssExtractPlugin({
-  filename: (chunkData) =>
-    `${chunkData.name.replace('/js/', '/css/')}.[chunkhash:8].css`
+  filenameTemplate: ({chunk}) =>
+    `${chunk.name.replace('/js/', '/css/')}.[chunkhash:8].css`
 })
 ```
 

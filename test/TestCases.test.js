@@ -40,6 +40,7 @@ describe('TestCases', () => {
           directoryForCase,
           'webpack.config.js'
         ));
+
         for (const config of [].concat(webpackConfig)) {
           Object.assign(
             config,
@@ -56,12 +57,15 @@ describe('TestCases', () => {
             config
           );
         }
+
         webpack(webpackConfig, (err, stats) => {
           if (err) {
             done(err);
             return;
           }
+
           done();
+
           // eslint-disable-next-line no-console
           console.log(
             stats.toString({
@@ -71,6 +75,7 @@ describe('TestCases', () => {
               modules: false,
             })
           );
+
           if (stats.hasErrors()) {
             done(
               new Error(
@@ -80,40 +85,17 @@ describe('TestCases', () => {
                 })
               )
             );
+
             return;
           }
+
           const expectedDirectory = path.resolve(directoryForCase, 'expected');
 
-          for (const file of walkSync(expectedDirectory)) {
-            const actualFilePath = file.replace(
-              expectedDirectory,
-              path.join(outputDirectory, directory)
-            );
-            const expectedContent = fs.readFileSync(file, 'utf-8');
-            const actualContent = fs.readFileSync(actualFilePath, 'utf-8');
+          compareDirectory(outputDirectoryForCase, expectedDirectory);
 
-            expect(actualContent).toEqual(expectedContent);
-          }
           done();
         });
       }, 10000);
     }
   }
 });
-
-/**
- * Synchronously traverse directory of files
- * @param {String} dir
- * @returns {String} path to file or directory
- */
-function* walkSync(dir) {
-  for (const file of fs.readdirSync(dir)) {
-    const pathToFile = path.join(dir, file);
-    const isDirectory = fs.statSync(pathToFile).isDirectory();
-    if (isDirectory) {
-      yield* walkSync(pathToFile);
-    } else {
-      yield pathToFile;
-    }
-  }
-}
